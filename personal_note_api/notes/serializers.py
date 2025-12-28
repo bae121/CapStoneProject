@@ -23,6 +23,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password']
 
+    def validate(self, data):
+        user = authenticate(username=data['username'], password=data['password'])
+        if user and user.is_active:
+            data['user'] = user
+            return data
+        raise serializers.ValidationError("Invalid credentials")
+
+
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
@@ -37,7 +45,20 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        user = authenticate(**data)
+        user = authenticate(data)
         if user and user.is_active:
             return user
         raise serializers.ValidationError("Invalid credentials")
+
+class DailyNotesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['daily_notes']
+        extra_kwargs = {'daily_notes': {'required': False}}
+
+        
+
+class WeeklySummarySerializer(serializers.ModelSerializer): 
+    class Meta: 
+        model = User 
+        fields = ['weekly_summary']

@@ -15,8 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from notes.views import RegisterView, LoginView, GoalListCreateView, GoalDetailView
+from django.urls import path, include
+from notes.views import RegisterView, LoginView, GoalListCreateView, GoalDetailView, DailyNotesView, WeeklySummaryView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,6 +24,12 @@ urlpatterns = [
     path('api/login/', LoginView.as_view(), name='login'),
 
     # Goal endponts
-path('api/goals/', GoalListCreateView.as_view(), name='goal-list-create'), 
-path('api/goals/<int:pk>/', GoalDetailView.as_view(), name='goal-detail'),
+    path('api/goals/', GoalListCreateView.as_view(), name='goal-list-create'), 
+    path('api/goals/<int:pk>/', GoalDetailView.as_view(), name='goal-detail'),
+
+    # Notes & Summary endpoints 
+    path('api/daily-notes/', DailyNotesView.as_view(), name='daily-notes'), 
+    path('api/weekly-summary/', WeeklySummaryView.as_view(), name='weekly-summary'), 
+
+    path('', include('notes.urls')),
 ]
