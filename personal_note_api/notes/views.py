@@ -9,6 +9,9 @@ from django.shortcuts import render, redirect
 from .models import User, Goal
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, GoalSerializer, DailyNotesSerializer, WeeklySummarySerializer
 
+def home(request): 
+    return render(request, 'notes/home.html')
+
 # Register new users
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()

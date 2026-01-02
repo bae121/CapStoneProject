@@ -16,20 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from notes.views import RegisterView, LoginView, GoalListCreateView, GoalDetailView, DailyNotesView, WeeklySummaryView
+from notes.views import RegisterView, LoginView, GoalListCreateView, GoalDetailView, DailyNotesView, WeeklySummaryView, CustomLoginView, CustomLogoutView, register, profile, home
 
 urlpatterns = [
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
+
     path('api/register/', RegisterView.as_view(), name='register'), 
     path('api/login/', LoginView.as_view(), name='login'),
-
-    # Goal endponts
     path('api/goals/', GoalListCreateView.as_view(), name='goal-list-create'), 
     path('api/goals/<int:pk>/', GoalDetailView.as_view(), name='goal-detail'),
-
-    # Notes & Summary endpoints 
     path('api/daily-notes/', DailyNotesView.as_view(), name='daily-notes'), 
     path('api/weekly-summary/', WeeklySummaryView.as_view(), name='weekly-summary'), 
+
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
+    path('register/', register, name='register'),
+    path('profile/', profile, name='profile'),
 
     path('', include('notes.urls')),
 ]
