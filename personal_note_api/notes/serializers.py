@@ -2,11 +2,13 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import User, Goal
 
-class GoalSerializer(serializers.ModelSerializer): 
-    class Meta: 
-        model = Goal 
-        fields = ['id', 'title', 'description', 'created_at'] 
+
+class GoalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Goal
+        fields = ['id', 'title', 'description', 'created_at']
         read_only_fields = ['id', 'created_at']
+
 
 class UserSerializer(serializers.ModelSerializer):
     goals = serializers.StringRelatedField(many=True, read_only=True)
@@ -23,21 +25,22 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password']
 
-    def validate(self, data):
-        user = authenticate(username=data['username'], password=data['password'])
-        if user and user.is_active:
-            data['user'] = user
-            return data
-        raise serializers.ValidationError("Invalid credentials")
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already taken")
+        return value
 
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already registered")
+        return value
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        return User.objects.create_user(
             username=validated_data['username'],
-            email=validated_data['email'],
+            email=validated_data.get('email'),
             password=validated_data['password']
         )
-        return user
 
 
 class LoginSerializer(serializers.Serializer):
@@ -45,10 +48,13 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        user = authenticate(data)
-        if user and user.is_active:
-            return user
-        raise serializers.ValidationError("Invalid credentials")
+        user = authenticate(username=data.get('username'), password=data.get('password'))
+        if not user:
+            raise serializers.ValidationError("Invalid credentials")
+        if not user.is_active:
+            raise serializers.ValidationError("User account is disabled")
+        return user
+
 
 class DailyNotesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -56,9 +62,8 @@ class DailyNotesSerializer(serializers.ModelSerializer):
         fields = ['daily_notes']
         extra_kwargs = {'daily_notes': {'required': False}}
 
-        
 
-class WeeklySummarySerializer(serializers.ModelSerializer): 
-    class Meta: 
-        model = User 
+class WeeklySummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
         fields = ['weekly_summary']

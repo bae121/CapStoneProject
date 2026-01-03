@@ -16,23 +16,33 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from notes.views import RegisterView, LoginView, GoalListCreateView, GoalDetailView, DailyNotesView, WeeklySummaryView, CustomLoginView, CustomLogoutView, register, profile, home
+from notes.views import (
+    RegisterView, LoginView, GoalListCreateView, GoalDetailView,
+    DailyNotesView, WeeklySummaryView,
+    CustomLoginView, CustomLogoutView, register, profile, home
+)
 
 urlpatterns = [
+    # Root home page
     path('', home, name='home'),
+
+    # Admin
     path('admin/', admin.site.urls),
 
-    path('api/register/', RegisterView.as_view(), name='register'), 
-    path('api/login/', LoginView.as_view(), name='login'),
-    path('api/goals/', GoalListCreateView.as_view(), name='goal-list-create'), 
+    # API endpoints
+    path('api/register/', RegisterView.as_view(), name='api-register'),
+    path('api/login/', LoginView.as_view(), name='api-login'),
+    path('api/goals/', GoalListCreateView.as_view(), name='goal-list-create'),
     path('api/goals/<int:pk>/', GoalDetailView.as_view(), name='goal-detail'),
-    path('api/daily-notes/', DailyNotesView.as_view(), name='daily-notes'), 
-    path('api/weekly-summary/', WeeklySummaryView.as_view(), name='weekly-summary'), 
+    path('api/daily-notes/', DailyNotesView.as_view(), name='daily-notes'),
+    path('api/weekly-summary/', WeeklySummaryView.as_view(), name='weekly-summary'),
 
+    # Template-based authentication
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', CustomLogoutView.as_view(), name='logout'),
     path('register/', register, name='register'),
     path('profile/', profile, name='profile'),
 
-    path('', include('notes.urls')),
+    # Include app-specific URLs under a prefix (optional)
+    path('notes/', include('notes.urls')),
 ]
