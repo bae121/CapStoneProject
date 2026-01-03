@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from notes.views import (
-    RegisterView, LoginView, GoalListCreateView, GoalDetailView,
+    APIRegisterView, APILoginView, GoalListCreateView, GoalDetailView,
     DailyNotesView, WeeklySummaryView,
     CustomLoginView, CustomLogoutView, register, profile, home
 )
@@ -30,8 +30,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # API endpoints
-    path('api/register/', RegisterView.as_view(), name='api-register'),
-    path('api/login/', LoginView.as_view(), name='api-login'),
+    path('api/register/', APIRegisterView.as_view(), name='api-register'),
+    path('api/login/', APILoginView.as_view(), name='api-login'),
     path('api/goals/', GoalListCreateView.as_view(), name='goal-list-create'),
     path('api/goals/<int:pk>/', GoalDetailView.as_view(), name='goal-detail'),
     path('api/daily-notes/', DailyNotesView.as_view(), name='daily-notes'),

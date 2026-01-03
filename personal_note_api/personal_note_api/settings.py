@@ -70,7 +70,7 @@ ROOT_URLCONF = 'personal_note_api.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # Add both global and app templates
+        
         'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -110,8 +110,7 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]  # optional, if you have a static folder
-STATIC_ROOT = BASE_DIR / "staticfiles"    # for collectstatic in production
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Media files (for user uploads)
 MEDIA_URL = '/media/'
