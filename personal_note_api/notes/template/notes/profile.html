@@ -1,19 +1,19 @@
 {% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
 {% block content %}
 <h2>Profile</h2>
-<form method="post">
-  {% csrf_token %}
-  <label>Daily Notes:</label>
-  <textarea name="daily_notes">{{ user.daily_notes }}</textarea>
-  <label>Weekly Summary:</label>
-  <textarea name="weekly_summary">{{ user.weekly_summary }}</textarea>
-  <button type="submit">Save</button>
-</form>
+<p>Welcome, {{ user.username }}!</p>
 
-<h3>Your Goals</h3>
-<ul>
-  {% for goal in user.goals.all %}
-    <li>{{ goal.title }} - {{ goal.description }}</li>
-  {% endfor %}
-</ul>
+<form method="post">
+    {% csrf_token %}
+    <label for="daily_notes">Daily Notes:</label><br>
+    <textarea name="daily_notes" rows="4" cols="50">{{ user.daily_notes }}</textarea><br><br>
+
+    <label for="weekly_summary">Weekly Summary:</label><br>
+    <textarea name="weekly_summary" rows="4" cols="50">{{ user.weekly_summary }}</textarea><br><br>
+
+    <button type="submit">Save</button>
+</form>
 {% endblock %}
