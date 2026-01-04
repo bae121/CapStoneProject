@@ -1,74 +1,82 @@
-from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-
-from rest_framework import generics, permissions
-from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, generics, permissions
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate, login, logout
 
-from .models import User, Goal
+from .models import Goal
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer,
     GoalSerializer, DailyNotesSerializer, WeeklySummarySerializer
 )
 
 
-class CustomLoginView(LoginView):
-    template_name = 'notes/login.html'
+# --- HOME ---
+class HomeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({"message": "Welcome to Personal Note Project"})
 
 
-class CustomLogoutView(LogoutView):
-    template_name = 'notes/logout.html'
+# --- PROFILE ---
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        """Return user profile data."""
+        return Response(UserSerializer(request.user).data)
 
-def register(request):
-    """Template-based registration using Django's UserCreationForm."""
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = UserCreationForm()
-    return render(request, 'notes/register.html', {'form': form})
-
-
-@login_required
-def profile(request):
-    """Profile view where users can update daily notes and weekly summary."""
-    if request.method == 'POST':
-        request.user.daily_notes = request.POST.get('daily_notes')
-        request.user.weekly_summary = request.POST.get('weekly_summary')
+    def put(self, request):
+        """Update daily notes and weekly summary."""
+        request.user.daily_notes = request.data.get("daily_notes", request.user.daily_notes)
+        request.user.weekly_summary = request.data.get("weekly_summary", request.user.weekly_summary)
         request.user.save()
-        return redirect('profile')
-    return render(request, 'notes/profile.html', {'user': request.user})
+        return Response({"message": "Profile updated successfully"})
 
 
-def home(request):
-    """Home page view."""
-    return render(request, 'notes/home.html')
+# --- REGISTER ---
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({
+                "message": "User registered successfully",
+                "user": UserSerializer(user).data,
+                "token": token.key
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class APIRegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]
-
-
-class APILoginView(APIView):
-    permission_classes = [permissions.AllowAny]
+# --- LOGIN ---
+class LoginView(APIView):
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
+        login(request, user)  # Django session login (optional)
         token, _ = Token.objects.get_or_create(user=user)
         return Response({
-            "token": token.key,
-            "user": UserSerializer(user).data
+            "message": "Login successful",
+            "user": UserSerializer(user).data,
+            "token": token.key
         })
+
+
+# --- LOGOUT ---
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logout(request)
+        return Response({"message": "Logout successful"})
 
 
 class GoalListCreateView(generics.ListCreateAPIView):

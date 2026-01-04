@@ -1,26 +1,10 @@
 from django.urls import path
-from notes.views import (
-    APIRegisterView, APILoginView,
-    GoalListCreateView, GoalDetailView,
-    DailyNotesView, WeeklySummaryView,
-    CustomLoginView, CustomLogoutView,
-    register, profile, home
-)
+from .views import HomeView, ProfileView, RegisterView, LoginView, LogoutView
 
 urlpatterns = [
-    path('', home, name='home'),
-    
-    # API endpoints
-    path('api/register/', APIRegisterView.as_view(), name='api-register'),
-    path('api/login/', APILoginView.as_view(), name='api-login'),
-    path('api/goals/', GoalListCreateView.as_view(), name='goal-list-create'),
-    path('api/goals/<int:pk>/', GoalDetailView.as_view(), name='goal-detail'),
-    path('api/daily-notes/', DailyNotesView.as_view(), name='daily-notes'),
-    path('api/weekly-summary/', WeeklySummaryView.as_view(), name='weekly-summary'),
-
-    # Template-based views
-    path('login/', CustomLoginView.as_view(), name='login'),
-    path('logout/', CustomLogoutView.as_view(), name='logout'),
-    path('register/', register, name='register'),
-    path('profile/', profile, name='profile'),
+    path('', HomeView.as_view(), name='home'),
+    path('profile/', ProfileView.as_view(), name='profile'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 ]
